@@ -36,7 +36,10 @@ def lu_decomposition_vector_storage(A, dU):
 
 
 def direct_substitution(L_vec, b, n):
-
+    """
+    We solve the lower-triangular system L * y = b via forward substitution.
+    We start computing L first from top to bottom.
+    """
     y = np.zeros(n)
     for i in range(n):
         sum_val = 0.0
@@ -46,11 +49,10 @@ def direct_substitution(L_vec, b, n):
         y[i] = (b[i] - sum_val) / L_vec[idxL(i, i)]
     return y
 
-
 def indirect_substitution(U_vec, y, n):
     """
     Solves the upper-triangular system U * x = y via back substitution.
-    U is stored in compact form in U_vec.
+    We start computing U first from bottom to top.
     """
     x = np.zeros(n)
     for i in range(n - 1, -1, -1):

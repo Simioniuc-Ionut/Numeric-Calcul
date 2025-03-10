@@ -98,47 +98,54 @@ def compute_detA(L,U):
 print("Det A = ", compute_detA(A_combined,U_diag))
 '''Compute Ax=b '''
 # 1: Direct methode
-def direct_meth(A_combined,U_diag,b_values):
+def substitution(A_combined,U_diag,b_values):
     # Ax = b => LUx = b => {Ly = b, Ux = y}
     #extract lower triangular part
-    if b_values.shape[0] != A_combined.shape[0]:
+    # if b_values.shape[0] != A_combined.shape[0]:
+    #     raise ValueError("The dimensions of the matrix A and the vector b do not match.")
+    #
+    # # Solve Ly = b
+    # y = np.linalg.solve(np.tril(A_combined), b_values)
+    #
+    # # Replace the diagonal of U in-place
+    # np.fill_diagonal(A_combined, U_diag)
+    #
+    # # Solve Ux = y
+    # x = np.linalg.solve(np.triu(A_combined), y)
+    #
+    # return x
+
+    if len(b_values) != len(A_combined):
         raise ValueError("The dimensions of the matrix A and the vector b do not match.")
 
-    # Solve Ly = b
-    y = np.linalg.solve(np.tril(A_combined), b_values)
+    # Solve Ly = b (forward substitution)
+    y = [0] * len(b_values)
+    for i in range(len(b_values)):
+        sum_val = 0
+        for j in range(i):
+            sum_val += A_combined[i][j] * y[j]
+        y[i] = (b_values[i] - sum_val) / A_combined[i][i]
 
     # Replace the diagonal of U in-place
-    np.fill_diagonal(A_combined, U_diag)
+    for i in range(len(U_diag)):
+        A_combined[i][i] = U_diag[i]
 
-    # Solve Ux = y
-    x = np.linalg.solve(np.triu(A_combined), y)
+    # Solve Ux = y (backward substitution)
+    x = [0] * len(y)
+    for i in range(len(y) - 1, -1, -1):
+        sum_val = 0
+        for j in range(i + 1, len(y)):
+            sum_val += A_combined[i][j] * x[j]
+        x[i] = (y[i] - sum_val) / A_combined[i][i]
 
     return x
-def indirect_meth(A_combined,U_diag,b_values):
-        # Ax = b => LUx = b => {Ly = b, Ux = y}
-        #extract lower triangular part
-        if b_values.shape[0] != A_combined.shape[0]:
-            raise ValueError("The dimensions of the matrix A and the vector b do not match.")
 
-        # Solve Ly = b
-        A_inv = np.linalg.inv(np.tril(A_combined))
-        y = np.dot(A_inv, b_values)
 
-        # Replace the diagonal of U in-place
-        np.fill_diagonal(A_combined, U_diag)
 
-        # Solve Ux = y
-        x = np.linalg.solve(np.triu(A_combined), y)
-
-        # To print first 13 decimals
-        # np.set_printoptions(precision=13, suppress=True)
-
-        return x
 
 b = np.array([21.6,33.6,51.6])
-print("Direct method:" , direct_meth(A_combined.copy(),U_diag,b))
-print("Indirect method:" , indirect_meth(A_combined.copy(),U_diag,b))
-x_LU = direct_meth(A_combined.copy(),U_diag,b)
+print("Direct method:" , substitution(A_combined.copy(),U_diag,b))
+x_LU = substitution(A_combined.copy(),U_diag,b)
 ''''''
 '''Verify solution through norm calculation'''
 def compute_norm(A_init,x_LU,b,epsilon):
@@ -171,7 +178,6 @@ print("Product L2 * U2 : \n",L2 @ U2)
 print("Original matrix A2 : \n",A2)
 b2 = np.array([2,-6,2])
 print("Det A2 = ", compute_detA(A_combined2,U_diag2))
-print("Direct method:" , direct_meth(A_combined2.copy(),U_diag2,b2))
-print("Indirect method:" , indirect_meth(A_combined2.copy(),U_diag2,b2))
-print("Norm of the solution A2:", compute_norm(A2,direct_meth(A_combined2.copy(),U_diag2,b2),b2,epsilon))
+print("Substitution method:" , substitution(A_combined2.copy(),U_diag2,b2))
+print("Norm of the solution A2:", compute_norm(A2,substitution(A_combined2.copy(),U_diag2,b2),b2,epsilon))
 print("-"*50)
