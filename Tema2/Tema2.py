@@ -170,7 +170,7 @@ A_combined2 = lu_inplace_with_fixed_U_diag(A2.copy(), U_diag2)
 L2 = np.tril(A_combined2)  # Lower triangular part (including diagonal)
 
 U2 = np.triu(A_combined2, k=1)  # Strictly upper triangular part
-np.fill_diagonal(U2, U_diag2,)
+np.fill_diagonal(U2, U_diag2)
 print("A combined 2 : \n",A_combined2)
 print("L2 : \n",L2)
 print("U2 : \n",U2)
@@ -181,3 +181,60 @@ print("Det A2 = ", compute_detA(A_combined2,U_diag2))
 print("Substitution method:" , substitution(A_combined2.copy(),U_diag2,b2))
 print("Norm of the solution A2:", compute_norm(A2,substitution(A_combined2.copy(),U_diag2,b2),b2,epsilon))
 print("-"*50)
+
+#lib
+import numpy as np
+
+def compute_solution_and_inverse_numpy(A, b, xLU):
+    """
+    1. Calculate the solution of the system Ax = b
+    https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html
+    2. Calculate the inverse of matrix A
+    https://numpy.org/doc/stable/reference/generated/numpy.linalg.inv.html
+    3. Calculate the norms
+    https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html
+    """
+    # 1.
+    if np.linalg.det(A) == 0:
+        raise ValueError("Matrix A is not invertible, det(A) = 0")
+    else:
+        x_lib = np.linalg.solve(A, b)
+
+    # 2.
+    A_inv_lib = np.linalg.inv(A)
+
+    # 3.
+    norm1 = np.linalg.norm(xLU - x_lib, 2)
+    norm2 = np.linalg.norm(xLU - np.dot(A_inv_lib, b), 2)
+
+    # Display
+    print(f"Solution of the system (x_lib):\n{x_lib}")
+    print(f"Inverse of matrix A (A_inv_lib):\n{A_inv_lib}")
+    print(f"Norm ||xLU - x_lib||_2 = {norm1}")
+    print(f"Norm ||xLU - A^{{-1}} b||_2 = {norm2:.10f}")
+
+    eps = 10**(-9)
+    if abs(norm2) < eps:
+        print(norm2, "-->", True)
+    else:
+        print(norm2, "-->", False)
+
+    return x_lib, A_inv_lib
+
+
+#ex1
+xLU = substitution(A_combined2.copy(), U_diag2, b2)
+xLU_arr = np.array(xLU)
+compute_solution_and_inverse_numpy(A2, b2, xLU_arr)
+print("-"*50)
+#ex2
+n = 101
+A_ex = np.random.rand(n, n)
+Ud_ex = np.random.rand(n)
+A_ex_combined = lu_inplace_with_fixed_U_diag(A_ex.copy(), Ud_ex)
+L_ex = np.tril(A_ex_combined)
+U_ex = np.triu(A_ex_combined, k=1)
+np.fill_diagonal(U_ex, Ud_ex)
+b_ex = np.random.rand(n)
+xLU_ex = np.array(substitution(A_ex_combined.copy(), Ud_ex, b_ex))
+compute_solution_and_inverse_numpy(A_ex, b_ex, xLU_ex)
