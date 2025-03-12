@@ -40,24 +40,26 @@ polynomials = [
     ("p8", lambda x: x * horner([c6, -c5, c4, -c3, c2, -c1, 1], x**2))
 ]
 
+
 sin_exact = np.sin(x_values)
 errors = []
 
 for name, poly in polynomials:
-    # print("p:", pol, "sin:", sin_exact)
+  # print("p:", pol, "sin:", sin_exact)
     errors.append(np.abs(poly(x_values) - sin_exact))
 
 # print("Errors shape:", np.array(errors).shape) # shape: (8, 10000)
 
 errors = np.array(errors)
-best_3_per_x = np.argsort(errors, axis=0)[:3].T  # sort the errors for each x ( axis=0 for rows )
+best_3_per_x = np.argsort(errors, axis=0)[:3]  # sort the errors for each x ( axis=0 for columns )
 
 for i, best_indices in enumerate(best_3_per_x, start=1):
-    print(f"x{i} -> {best_indices + 1}") # index starts from 0, so we add 1
+    print(f"top {i} pol -> {best_indices + 1}") # index starts from 0, so we add 1
 
+print("\n")
 
 # the sum of errors for each polynomial
-sum_errors = np.sum(errors, axis=1) # axis=1 for columns
+sum_errors = np.sum(errors, axis=1) # axis=1 for rows
 sorted_indices = np.argsort(sum_errors)
 
 for place, index in enumerate(sorted_indices, start=1):
