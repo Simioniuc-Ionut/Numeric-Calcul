@@ -2,55 +2,23 @@ import numpy as np
 ## Ax = b
 ## A = LU
 ## LUx=b => { Ly=b, Ux=y }
-def lu_inplace_with_fixed_U_diag_optimized(A, U_diag):
-    n = A.shape[0]
-    for p in range(n):
-        A[p:n, p] = (A[p:n, p] - A[p:n, :p] @ A[:p, p]) / U_diag[p]
-        if p + 1 < n:
-            A[p, p+1:n] = (A[p, p+1:n] - A[p, :p] @ A[:p, p+1:n]) / A[p, p]
-    return
 
 def lu_inplace_with_fixed_U_diag(A, U_diag):
-    """
-    Computes the in-place LU decomposition of matrix A using a fixed diagonal for U.
-
-    This function overwrites A with:
-      - The lower triangular matrix L (including its diagonal) in the lower part.
-      - The strictly upper triangular part of U in the upper part.
-      The diagonal of U is provided externally by U_diag.
-
-    The formulas used are:
-      For each column p from 0 to n-1:
-        For i from p to n-1:
-          L[i, p] = (A[i, p] - sum_{k=0}^{p-1} (L[i, k] * U[k, p])) / U_diag[p]
-        For j from p+1 to n-1:
-          U[p, j] = (A[p, j] - sum_{k=0}^{p-1} (L[p, k] * U[k, j])) / L[p, p]
-
-    Note:
-      - L[i,k] is stored in A[i, k] for k ≤ i.
-      - U[k,j] is stored in A[k, j] for k < j.
-
-    :param A: The square matrix to decompose (modified in-place).
-    :param U_diag: A 1D array containing the diagonal elements of U.
-    :return: The modified matrix A containing L in its lower part and U in its upper part.
-    """
     n = A.shape[0]
     for p in range(n):
-        # Compute L[i, p] for i = p, ..., n-1
-        for i in range(p, n):
-            sum_LU = 0.0
-            for k in range(p):
-                sum_LU += A[i, k] * A[k, p]
-            A[i, p] = (A[i, p] - sum_LU) / U_diag[p]
+        # Acc elementele L pe linia p (pentru coloanele 0 ... p)
+        for j in range(0, p + 1):
+            if j == 0:
+                # consideram suma = 0 când j==0
+                s = 0.0
+            else:
+                s = A[p, :j] @ A[:j, j]  # Ex : A[1,0] * A[0,1] + A[1,1] * A[1,1] + A[1,2] * A[2,1]
+            A[p, j] = (A[p, j] - s) / U_diag[j]
 
-        # Compute U[p, j] for j = p+1, ..., n-1
+        # Acc elementele U pe linia p (pentru coloanele p+1 ... n-1)
         for j in range(p + 1, n):
-            sum_LU = 0.0
-            for k in range(p):
-                sum_LU += A[p, k] * A[k, j]
-            # A[p, p] holds L[p, p]
-            A[p, j] = (A[p, j] - sum_LU) / A[p, p]
-
+            s = A[p, :p] @ A[:p, j] # Ex : A[1,0] * A[0,2] + A[1,1] * A[1,2] + A[1,2] * A[2,2]
+            A[p, j] = (A[p, j] - s) / A[p, p]
     return A
 
 
