@@ -87,9 +87,9 @@ if __name__ == '__main__':
 
     L_vec, U_vec = lu_decomposition_vector_storage(A, dU)
 
-    # 1. Solve L*y = b (forward substitution).
+    # 1 Solve L*y = b (forward substitution).
     y = direct_substitution(L_vec, b, n)
-    # 2. Solve U*x = y (back substitution).
+    # 2 Solve U*x = y (back substitution).
     x = indirect_substitution(U_vec, y, n)
 
     LU_product = reconstruct_LU(L_vec, U_vec, n)

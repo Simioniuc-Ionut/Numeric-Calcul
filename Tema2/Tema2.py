@@ -7,12 +7,13 @@ def lu_inplace_with_fixed_U_diag(A, U_diag):
     n = A.shape[0]
     for p in range(n):
         # Acc elementele L pe linia p (pentru coloanele 0 ... p)
+
         for j in range(0, p + 1):
             if j == 0:
                 # consideram suma = 0 când j==0
                 s = 0.0
             else:
-                s = A[p, :j] @ A[:j, j]  # Ex : A[1,0] * A[0,1] + A[1,1] * A[1,1] + A[1,2] * A[2,1]
+                s = A[p, :j] @ A[:j, j]  # Ex : A[1,0] * A[0,1] + A[1,1] * A[1,1]
             A[p, j] = (A[p, j] - s) / U_diag[j]
 
         # Acc elementele U pe linia p (pentru coloanele p+1 ... n-1)
@@ -107,8 +108,6 @@ def substitution(A_combined,U_diag,b_values):
         x[i] = (y[i] - sum_val) / A_combined[i][i]
 
     return x
-
-
 
 
 b = np.array([21.6,33.6,51.6])
